@@ -787,5 +787,7 @@ def get_admin_dashboard_stats():
     return json_response(True, "Dashboard stats retrieved", stats)
 
 if __name__ == '__main__':
-    print("[+] Blood Bank Backend API running on http://localhost:5000")
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    port = int(os.getenv("PORT", 5000))
+    print(f"[+] Blood Bank Backend API running on http://0.0.0.0:{port}")
+    app.run(host='0.0.0.0', port=port)
+
