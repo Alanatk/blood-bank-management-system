@@ -7,12 +7,47 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from config import DB_CONFIG, SECRET_KEY
 from datetime import datetime
 
+import os
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = SECRET_KEY
-CORS(app)
+
+frontend_url = os.getenv("FRONTEND_URL") or os.getenv("CORS_ORIGIN")
+if frontend_url and frontend_url != "*":
+    allowed_origins = [frontend_url, frontend_url.rstrip('/'), "http://localhost:3000"]
+    CORS(app, origins=allowed_origins, supports_credentials=True)
+else:
+    CORS(app)
+
 
 # All standard blood groups
 ALL_BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
+
+# Blood compatibility map: recipient blood group -> list of compatible donor blood groups
+COMPATIBLE_DONORS_MAP = {
+    'O-': ['O-'],
+    'O+': ['O+', 'O-'],
+    'A-': ['A-', 'O-'],
+    'A+': ['A+', 'A-', 'O+', 'O-'],
+    'B-': ['B-', 'O-'],
+    'B+': ['B+', 'B-', 'O+', 'O-'],
+    'AB-': ['AB-', 'A-', 'B-', 'O-'],
+    'AB+': ['AB+', 'AB-', 'A+', 'A-', 'B+', 'B-', 'O+', 'O-']
+}
+
+# Donor compatibility map: donor blood group -> list of recipient blood groups donor can give to
+DONOR_CAN_GIVE_TO_MAP = {
+    'O-': ['O-', 'O+', 'A-', 'A+', 'B-', 'B+', 'AB-', 'AB+'],
+    'O+': ['O+', 'A+', 'B+', 'AB+'],
+    'A-': ['A-', 'A+', 'AB-', 'AB+'],
+    'A+': ['A+', 'AB+'],
+    'B-': ['B-', 'B+', 'AB-', 'AB+'],
+    'B+': ['B+', 'AB+'],
+    'AB-': ['AB-', 'AB+'],
+    'AB+': ['AB+']
+}
+
+
 
 # Connection pool
 try:
