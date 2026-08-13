@@ -1,8 +1,8 @@
 services:
-  # Python Flask Backend API Web Service
+  # Python Flask Backend API Service
   - type: web
     name: bloodbank-backend
-    env: python
+    runtime: python
     rootDir: backend
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn app:app
@@ -20,15 +20,12 @@ services:
       - key: SECRET_KEY
         generateValue: true
       - key: FRONTEND_URL
-        fromService:
-          type: web
-          name: bloodbank-frontend
-          property: url
+        sync: false
 
   # React Frontend Static Site Service
   - type: web
     name: bloodbank-frontend
-    env: static
+    runtime: static
     rootDir: frontend
     buildCommand: npm install && npm run build
     staticPublishPath: ./build
@@ -38,7 +35,4 @@ services:
         destination: /index.html
     envVars:
       - key: REACT_APP_API_URL
-        fromService:
-          type: web
-          name: bloodbank-backend
-          property: url
+        sync: false
